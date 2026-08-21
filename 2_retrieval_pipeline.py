@@ -1,13 +1,19 @@
+import os
+
 from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
+from langchain_aws import BedrockEmbeddings
 from dotenv import load_dotenv
 
 load_dotenv()
 
 persistent_directory = "db/chroma_db"
 
-# Load embeddings and vector store
-embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+# Must match the model used in ingestion_pipeline.py, or the stored 1024-dim
+# vectors cannot be compared against the query vector.
+embedding_model = BedrockEmbeddings(
+    model_id=os.getenv("BEDROCK_EMBEDDING_MODEL", "amazon.titan-embed-text-v2:0"),
+    region_name=os.getenv("AWS_REGION", "ap-south-1")
+)
 
 db = Chroma(
     persist_directory=persistent_directory,
