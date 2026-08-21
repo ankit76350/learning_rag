@@ -2,9 +2,11 @@ import os
 
 from langchain_community.document_loaders import TextLoader, DirectoryLoader
 from langchain_text_splitters import CharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
+from langchain_aws import BedrockEmbeddings
 from langchain_chroma import Chroma
 from dotenv import load_dotenv
+
+from utils import ProgressEmbeddings
 
 load_dotenv()
 
@@ -69,9 +71,13 @@ def split_documents(documents, chunk_size=1000, chunk_overlap=0):
 def create_vector_store(chunks, persist_directory="db/chroma_db"):
     """Create and persist ChromaDB vector store"""
     print("Creating embeddings and storing in ChromaDB...")
-        
-    embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
-    
+
+    embedding_model = BedrockEmbeddings(
+        model_id=os.getenv("BEDROCK_EMBEDDING_MODEL", "amazon.titan-embed-text-v2:0"),
+        region_name=os.getenv("AWS_REGION", "ap-south-1")
+    )
+    embedding_model = ProgressEmbeddings(embedding_model)
+
     # Create ChromaDB vector store
     print("--- Creating vector store ---")
     vectorstore = Chroma.from_documents(
