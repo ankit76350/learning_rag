@@ -22,7 +22,15 @@ db = Chroma(
 )
 
 # Search for relevant documents
-query = "How much did Microsoft pay to acquire GitHub?"
+# query = "How much did Microsoft pay to acquire GitHub?"
+query = "What was NVIDIA's first graphics accelerator called?"
+# query = "Which company did NVIDIA acquire to enter the mobile processor market?"
+# query = "What was Microsoft's first hardware product release?"
+# query = "How much did Microsoft pay to acquire GitHub?"
+# query = "In what year did Tesla begin production of the Roadster?"
+# query = "Who succeeded Ze'ev Drori as CEO in October 2008?"
+# query = "What was the name of the autonomous spaceport drone ship that achieved the first successful sea landing?"
+# query = "What was the original name of Microsoft before it became Microsoft?"
 
 retriever = db.as_retriever(search_kwargs={"k": 5})
 

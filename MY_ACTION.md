@@ -9,5 +9,10 @@ i run this beause i have run the ingestion pipline twice that created the duplic
 Remove-Item -Recurse -Force db\chroma_db
 python ingestion_pipeline.py
 
+2_retrieval_pipeline.py
+till here is pure embedding and similarity matching... till here no LLM invove here
+
+ 
+
 
 END
