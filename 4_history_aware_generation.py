@@ -1,18 +1,30 @@
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_aws import BedrockEmbeddings, ChatBedrockConverse
 
 # Load environment variables
 load_dotenv()
 
 # Connect to your document database
 persistent_directory = "db/chroma_db"
-embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-db = Chroma(persist_directory=persistent_directory, embedding_function=embeddings)
+embeddings = BedrockEmbeddings(
+    model_id="amazon.titan-embed-text-v2:0",
+    region_name="ap-south-1"
+)
+db = Chroma(
+    persist_directory=persistent_directory,
+    embedding_function=embeddings,
+    collection_metadata={"hnsw:space": "cosine"}
+)
 
 # Set up AI model
-model = ChatOpenAI(model="gpt-4o")
+model = ChatBedrockConverse(
+    model="apac.anthropic.claude-3-7-sonnet-20250219-v1:0",
+    region_name="ap-south-1",
+    temperature=0,
+    max_tokens=1024,
+)
 
 # Store our conversation as messages
 chat_history = []
@@ -87,3 +99,38 @@ def start_chat():
 
 if __name__ == "__main__":
     start_chat()
+
+
+#! question with the follow up question : Start
+# # 1. What was NVIDIA's first graphics accelerator called?
+# query = "When was it released?"
+# query = "Which company developed it?"
+
+# # 2. Which company did NVIDIA acquire to enter the mobile processor market?
+# query = "In what year did NVIDIA acquire it?"
+# query = "What mobile processor technology did the acquisition bring?"
+
+# # 3. What was Microsoft's first hardware product release?
+# query = "In what year was it released?"
+# query = "What was it designed to work with?"
+
+# # 4. How much did Microsoft pay to acquire GitHub?
+# query = "In what year was the acquisition completed?"
+# query = "Why did Microsoft acquire GitHub?"
+
+# # 5. In what year did Tesla begin production of the Roadster?
+# query = "When were the first Roadsters delivered to customers?"
+# query = "Who was Tesla's CEO at that time?"
+
+# # 6. Who succeeded Ze'ev Drori as CEO in October 2008?
+# query = "When did he become CEO?"
+# query = "What role did Ze'ev Drori hold before stepping down?"
+
+# # 7. What was the name of the autonomous spaceport drone ship that achieved the first successful sea landing?
+# query = "Which company operated that drone ship?"
+# query = "What rocket successfully landed on it?"
+
+# # 8. What was the original name of Microsoft before it became Microsoft?
+# query = "Who founded the company?"
+# query = "When was the company renamed to Microsoft?"
+#! question with the follow up question : END
