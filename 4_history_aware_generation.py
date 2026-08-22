@@ -34,13 +34,24 @@ def ask_question(user_question):
     
     # Step 1: Make the question clear using conversation history
     if chat_history:
+        # Flatten the history into one block. Passing it as real message turns
+        # lets the model mistake an earlier question for the one to rewrite.
+        history_text = "\n".join(
+            f"{'User' if isinstance(m, HumanMessage) else 'Assistant'}: {m.content}"
+            for m in chat_history
+        )
+
         # Ask AI to make the question standalone
         messages = [
-            SystemMessage(content="Given the chat history, rewrite the new question to be standalone and searchable. Just return the rewritten question."),
-        ] + chat_history + [
-            HumanMessage(content=f"New question: {user_question}")
+            SystemMessage(content=(
+                "Rewrite the user's LATEST question as a standalone search query. "
+                "Resolve pronouns like 'it', 'that', 'they' using the conversation. "
+                "Never answer the question and never repeat an earlier question. "
+                "Return only the rewritten query."
+            )),
+            HumanMessage(content=f"Conversation:\n{history_text}\n\nLatest question: {user_question}")
         ]
-        
+
         result = model.invoke(messages)
         search_question = result.content.strip()
         print(f"Searching for: {search_question}")
