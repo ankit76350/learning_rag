@@ -41,15 +41,27 @@ def ask_question(user_question):
             for m in chat_history
         )
 
-        # Ask AI to make the question standalone
+        # Ask AI to make the question standalone. The worked example matters:
+        # without it the model merges an earlier unanswered question into the
+        # rewrite instead of rewriting only the latest one.
         messages = [
             SystemMessage(content=(
-                "Rewrite the user's LATEST question as a standalone search query. "
-                "Resolve pronouns like 'it', 'that', 'they' using the conversation. "
-                "Never answer the question and never repeat an earlier question. "
-                "Return only the rewritten query."
+                "You rewrite a follow-up question into a standalone search query.\n"
+                "- Rewrite ONLY the latest question.\n"
+                "- Replace pronouns (it, that, they, this) with the entity they refer to.\n"
+                "- If an earlier question went unanswered, ignore it. Never merge two "
+                "questions together.\n"
+                "- Never answer. Output only the rewritten question.\n\n"
+                "Example\n"
+                "Conversation:\n"
+                "User: What was Acme's first product called?\n"
+                "Assistant: It was called the Widget.\n"
+                "User: When was it released?\n"
+                "Assistant: I don't have enough information to answer that.\n"
+                "Latest question: Which company developed it?\n"
+                "Rewritten: Which company developed the Acme Widget?"
             )),
-            HumanMessage(content=f"Conversation:\n{history_text}\n\nLatest question: {user_question}")
+            HumanMessage(content=f"Conversation:\n{history_text}\n\nLatest question: {user_question}\nRewritten:")
         ]
 
         result = model.invoke(messages)
