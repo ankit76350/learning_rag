@@ -1,11 +1,18 @@
-from langchain_openai import ChatOpenAI
+import os
+
+from langchain_aws import ChatBedrockConverse
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
 # Initialize the LLM
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+llm = ChatBedrockConverse(
+    model=os.getenv("BEDROCK_CHAT_MODEL", "apac.amazon.nova-pro-v1:0"),
+    region_name=os.getenv("AWS_REGION", "ap-south-1"),
+    temperature=0,
+    max_tokens=1024,
+)
 
 # Tesla text to chunk
 tesla_text = """Tesla's Q3 Results
@@ -42,7 +49,14 @@ Return the text with <<<SPLIT>>> markers where you want to split:
 # Get AI response
 print("🤖 Asking AI to chunk the text...")
 response = llm.invoke(prompt)
-marked_text = response.content
+
+# ChatBedrockConverse returns content as a list of blocks, so pull out the text
+if isinstance(response.content, list):
+    marked_text = "".join(
+        block.get("text", "") for block in response.content if isinstance(block, dict)
+    )
+else:
+    marked_text = response.content
 
 # Split the text at the markers
 chunks = marked_text.split("<<<SPLIT>>>")
